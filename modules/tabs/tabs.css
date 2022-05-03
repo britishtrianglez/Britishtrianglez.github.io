@@ -1,0 +1,37 @@
+.TabContent {
+    border:solid black 1px;
+}
+.TabButton {
+    border:solid black 1px;
+    padding:5px;
+    padding-left:15px;
+    padding-right:15px;
+    user-select: none;
+}
+.TabButton[Selected=true] {
+    background: rgba(100,220,100,0.3);
+}
+.TabButton[Selected=true]:hover {
+    background:rgba(100,220,100,0.5);
+}
+.TabButton:hover {
+    background: rgba(100,100,100,0.2);
+}
+.TabButton[Disabled=true], .TabButton[Disabled=true]:hover {
+    background: rgb(100,100,100);
+}
+.TabMenu {
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border: solid black 1px;
+    border-bottom:none;
+}
+.TabButton {
+    flex-grow: 1;
+    text-align: center;
+}
+slot {
+
+    border: solid red 2px;
+}
