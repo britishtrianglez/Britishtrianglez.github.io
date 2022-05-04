@@ -53,14 +53,15 @@ class Tabs {
      * 
      * @param {String} name 
      * @param {HTMLElement} container 
-     * @param { {closable: Boolean, Disabled: Boolean} } options
+     * @param { {closable: Boolean, disabled: Boolean, hidden:Boolean} } options
      */
     InsertTag (name, container, options) {
         // Find Names
-
+        container.style.display = "block";
         options = {
             closable : JSON.parse( options?.closable || container.getAttribute("closable") || false),
-            Disabled : JSON.parse( options?.Disabled || container.getAttribute("disabled") || false)
+            disabled : JSON.parse( options?.disabled || container.getAttribute("disabled") || false),
+            hidden : JSON.parse(options?.hidden || container.getAttribute("hidden") || false)
         }
         
         var found = false;
@@ -96,9 +97,22 @@ class Tabs {
             tab.innerText = newName;
             this.TabSelector.appendChild(tab);
         
+            // Install CloseButton
+            tab.closeButton = document.createElement("div");
+            tab.closeButton.classList.add("TabCloseButton");
+
+            tab.closeButton.addEventListener("mouseover", (e) => {
+                console.log("MouseOver");
+                tab.setAttribute("CloseHovered", true);
+            });
+            tab.closeButton.addEventListener("mouseleave", (e) => {
+                console.log("MouseLEave");
+                tab.removeAttribute("CloseHovered");
+            });
+            tab.appendChild(tab.closeButton);
             
             
-            
+
             if (container.parentElement != this.parentElement) {
                 
                 container.parentElement.removeChild(container);
@@ -110,7 +124,7 @@ class Tabs {
             tab.clickListen = (e) => {
                 this.SelectTab(newName);
             }
-            if (options?.Disabled != true) {
+            if (options?.disabled != true) {
                 tab.addEventListener('click',tab.clickListen);
 
             } else {
@@ -121,23 +135,66 @@ class Tabs {
                 tab : tab,
                 slot: Slot,
                 isClosable: options?.closable || false,
-                isDisabled: options?.Disabled || false,
+                isDisabled: options?.disabled || false,
                 selectTab: () => {
                     tab.setAttribute("Selected", true);
                     Slot.style.display = "block";
                 },
                 deselectTab : () => {
+                    if (this.CurrentTab == newName) {
+                        this.CurrentTab = undefined;
+                    }
                     tab.removeAttribute("Selected");
                     Slot.style.display = "none";
+                },
+                ChangeClosable : (closable) => {
+                    if (closable != true) {
+                        tab.closeButton.classList.add("NoDisplay");
+                        tab.closeButton.removeEventListener("click", this.TabList[newName].closeTab);
+                    } else {
+                        tab.closeButton.classList.remove("NoDisplay");
+                        tab.closeButton.addEventListener("click", this.TabList[newName].closeTab);
+                    }
+                },
+                closeTab : () => {
+                    this.DisableTab(newName);
+                    Slot.parentElement.removeChild(Slot);
+                    tab.parentElement.removeChild(tab);
+                    container.parentElement.removeChild(container);
+                    this.TabList[newName] = undefined;
+                    delete this.TabList[newName];
                 }
             }
-            if (options?.Disabled != true) {
+            if (options?.disabled != true) {
                 this.SelectTab(newName);
             } else {
                 tab.setAttribute("disabled", true);
             }
+            this.TabList[newName].ChangeClosable(options?.closable);
 
-            
+            if (options?.hidden) {
+                this.HideTab(newName);
+            }
+
+        }
+        CloseTab (name) {
+            if (!this.TabList[name]) {
+                throw new Error("Tab Don't Exist", name);
+            }
+            this.TabList[name]?.closeTab();
+        }
+
+        EnableClose (name) {
+            if (!this.TabList[name]) {
+                throw new Error("Tab Don't Exist", name);
+            }
+            this.TabList[name].ChangeClosable(true);
+        }
+        DisableClose (name) {
+            if (!this.TabList[name]) {
+                throw new Error("Tab Don't Exist", name);
+            }
+            this.TabList[name].ChangeClosable(false);
         }
 
         SelectTab (name) {
@@ -169,8 +226,32 @@ class Tabs {
             this.TabList[name].tab.removeEventListener("click", this.TabList[name].tab.clickListen )
             this.TabList[name].tab.setAttribute("disabled", true);
         }
-        // Toggle Closable
         // Hide Tab
+        HideTab (name, deselectTab) {
+            if (!this.TabList[name]) {
+                throw new Error ("Tab Don't Exist", name);
+            }
+            if (deselectTab != false) {
+                // this.TabList.deselectTab(name);
+                if (this.CurrentTab == name) {
+                    this.TabList[this.CurrentTab]?.deselectTab();
+                }
+            }
+
+            this.TabList[name].tab.classList.add("NoDisplay");
+        }
+        ShowTab (name, selectTab) {
+            if (!this.TabList[name]){
+                throw new Error("Tab Don't Exist", name);
+            }
+            if (selectTab == true) {
+                this.SelectTab(name);
+            }
+            this.TabList[name].tab.classList.remove("NoDisplay");
+        }
+
+
+        // Toggle Closable
     }
 
 document.onreadystatechange = () => {

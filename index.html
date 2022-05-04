@@ -10,14 +10,53 @@
 </head>
 <body>
     
-    <div class="TabInit">
+    <div class="TabInit" id="MainTab">
         <div class="Tab" name="Default" style="margin:10px">
             <h4 >Example Names</h4>
         </div>
-        <div name="Example" style="margin:10px" disabled="true">
+        <div name="Example" style="margin:10px" hidden="false" closable="false" disabled="false">
             <h4>Example Tabs</h4>
-        </div>
+            <script>
+                var isHidden = false;
+                const UnHide = () => {
+                    if (isHidden) {
+                        MainTab.HideTab("Default");
+                    } else {
+                        MainTab.ShowTab("Default");
+                    }
+                    isHidden = !isHidden;
+                }
+                var IsDisabled = false;
+                const ToggleDisabled = () => {
+                    if (IsDisabled) {
+                        MainTab.EnableTab("Default");
+                    } else {
+                        MainTab.DisableTab("Default");
+                    }
+                    IsDisabled = !IsDisabled;
+                }
+            </script>
+            <button onclick="ToggleDisabled()">
+                ToggleDisabled
+            </button >
+            <button onclick="UnHide()">
+                ShowHiddenTab
+            </button >
 
+        </div>
+        <div class="TabInit" name="Testing Routes">
+
+                <div name="Disabled" disabled="true">
+                    <h3>Disabled</h3>
+                </div>
+                <div name="Hidden" hidden="true">
+                    <h4>Hidden</h4>
+                </div>
+                <div name="Closable" closable="true">
+                    <h3>Closable</h3>
+                </div>
+
+        </div>
     </div>
 
 </body>
