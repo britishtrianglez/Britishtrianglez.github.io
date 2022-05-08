@@ -19,13 +19,14 @@
 </head>
 <body>
 
-    <div class="TabInit" id="MainTab" scroll="false" >
+    <div class="TabInit" id="MainTab" scroll="false" default="Landing Page">
 
         <!-- <div name="Landing" closable="true">
             <h1>Hello World</h1>    
         </div> -->
-        <div name="Actual Landing Page" closeable="true" landing="true" hidden="false" >
+        <div name="Landing Page Example" closeable="true" landing="true">
             <button id="BtnNew">Create Example Tab</button>
+            <h3>This will only be shown as default if hidden is false</h3>
             <script>
                 document.getElementById("BtnNew").addEventListener("click", () => {
                     
@@ -36,11 +37,35 @@
                 })
                 </script>
         </div>
-        <div name="Second Page"  closable="true" hidden="true">
-            <h1>Secondary Page</h1>
+        <div name="First Default Tab" closable="false">
+            <h2>Non Closable Default tab</h2>
+            <h3> ( Cos its the first tab within Element ( Excluding Landing Page ) ) </h3>
+        </div>
+
+        <div name="Commands">
+
+            <button onclick="MainTab.UnhideAll()">UnhideAll</button>
+            <button onclick="MainTab.HideAll()">Hide All</button>
+
+            <button onclick="MainTab.SelectTab(MainTab.Lander)">Select First Tab</button>
+
+        </div>
+
+        <div name="Second Page"  closable="true" hidden="false">
+            <h1>Example Closable Tab</h1>
         </div>
         <div name="Landing Page" closable="true" hidden="true">
             <h2>Not A Landing PAGE!!!</h2>
+            <h3>Default will ignore hidden option</h3>
+            <h3>Hiding a tab will deselect said tab unless specified not to</h3>
+            <button onclick="
+                    if (MainTab.TabList['Landing Page'].isHidden) {
+                        MainTab.ShowTab('Landing Page');
+                    } else {
+                        MainTab.HideTab('Landing Page', false);
+                    }
+            ">Hide/Show this tab</button>
+
         </div>
     </div>
 

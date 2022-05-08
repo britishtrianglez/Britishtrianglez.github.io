@@ -5,17 +5,21 @@ class Tabs {
      * @param { { linkToCss : Path, Scroll : Boolean } } options
      */
     constructor(Element, options) {
-        const linkToCss = options?.linkToCss || "modules/tabs/tabs.css";
+        const linkToCss = options?.linkToCss || Element.getAttribute("linkToCss") ||"modules/tabs/tabs.css";
         // linkToCss = linkToCss || "modules/tabs/tabs.css";
-        this.Scroll = JSON.parse(options?.Scroll || Element.getAttribute("Scroll"));
-
+        this.Scroll = JSON.parse(options?.scroll || Element.getAttribute("Scroll"));
+        
+        
+        
         this.CurrentTab;
-        this.DefaultTab;
-
-
+        
+        
         this.container = Element;
         this.TabList = {};
-
+        
+        this.DefaultTab = this.container.getAttribute("Default") || options?.default;
+        
+        
         this.container.classList.remove("TabInit");
         this.container.classList.add("TabContainer");
 
@@ -61,10 +65,10 @@ class Tabs {
             }, 500);
         }
         // Get First Element then find first availble tab
-        if (!this.container.getAttribute("DefaultTab")) {
+        if (!this.DefaultTab) {
 
             let nameCheck = this.container.firstElementChild.slot;
-            let done = false; 
+            let done =  this.SelectTabIfVisible(nameCheck); 
             while (done == false && this.TabList[nameCheck].tab.nextElementSibling) {
                 console.log(`Try And Select Tab ${nameCheck}`);
                 done = this.SelectTabIfVisible(this.TabList[nameCheck].tab.nextElementSibling.returnName);
@@ -76,7 +80,8 @@ class Tabs {
 
                 this.SelectTab(this.ContentContainer.firstElementChild.slot);
             }
-
+        } else {
+            this.SelectTab(this.container.getAttribute("Default"));
         }
     }
     // Create Landing Element ( What is shown if no tabs are pressent )
@@ -101,12 +106,14 @@ class Tabs {
         }
 
 
-        if (JSON.parse(container.getAttribute("landing")) == true) {
-            
-            if (options.hidden != false) {
+        if ((JSON.parse(container.getAttribute("landing")) || optinos?.landing) == true) {
+
+            // debugger;
+            if (JSON.parse(container.getAttribute("hidden")) != false)
+            {
                 options.hidden = true;
             }
-            
+                        
             options.closable = false;
         }   
 
@@ -236,26 +243,7 @@ class Tabs {
                 this.DisableTab(newName);
 
 
-                    let checkName = newName;
-                    // Loops threw all siblin tabs for next available tab
-                    while (done == false && this.TabList[checkName].tab.nextElementSibling) {
-                        console.log(`Try And Select Tab ${checkName}`);
-                        done = this.SelectTabIfVisible(this.TabList[checkName].tab.nextElementSibling.returnName);
-                        checkName = this.TabList[checkName].tab.nextElementSibling.returnName;
-                    }
-                    // Loops threw all previous tabs for next available tab
-                    if (done == false) {
-                        checkName = newName;
-                        console.log(`Try And Select Tab ${checkName}`);
-                        while (done == false && this.TabList[checkName].tab.previousElementSibling) {
-                            done = this.SelectTabIfVisible(this.TabList[checkName].tab.previousElementSibling.returnName);
-                            checkName = this.TabList[checkName].tab.previousElementSibling.returnName;
-                        }
-                    }
-                    // If no tabs where found select lander tab ( if availble )
-                    if (done == false && this.Lander) {
-                        this.SelectTab(this.Lander)
-                    }
+                this.SelectNextTab(newName);
                 
                 Slot.parentElement.removeChild(Slot);
                 tab.parentElement.removeChild(tab);
@@ -285,6 +273,29 @@ class Tabs {
             this.HideTab(newName);
         }
 
+    }
+    SelectNextTab (name) {
+        let done =false;
+        let checkName = name;
+        // Loops threw all siblin tabs for next available tab
+        while (done == false && this.TabList[checkName].tab.nextElementSibling) {
+            console.log(`Try And Select Tab ${checkName}`);
+            done = this.SelectTabIfVisible(this.TabList[checkName].tab.nextElementSibling.returnName);
+            checkName = this.TabList[checkName].tab.nextElementSibling.returnName;
+        }
+        // Loops threw all previous tabs for next available tab
+        if (done == false) {
+            checkName = name;
+            console.log(`Try And Select Tab ${checkName}`);
+            while (done == false && this.TabList[checkName].tab.previousElementSibling) {
+                done = this.SelectTabIfVisible(this.TabList[checkName].tab.previousElementSibling.returnName);
+                checkName = this.TabList[checkName].tab.previousElementSibling.returnName;
+            }
+        }
+        // If no tabs where found select lander tab ( if availble )
+        if (done == false && this.Lander) {
+            this.SelectTab(this.Lander)
+        }
     }
     CloseTab(name) {
         if (!this.TabList[name]) {
@@ -355,6 +366,7 @@ class Tabs {
             // this.TabList.deselectTab(name);
             if (this.CurrentTab == name) {
                 this.TabList[this.CurrentTab]?.deselectTab();
+                this.SelectNextTab(name);
             }
         }
 
@@ -371,7 +383,11 @@ class Tabs {
         this.TabList[name].isHidden = false;
         this.TabList[name].tab.classList.remove("NoDisplay");
     }
-
+    HideAll (deselect) {
+        for (let tabName in this.TabList) {
+            this.HideTab(tabName, deselect);
+        }
+    }
     UnhideAll () {
         for (let tabName in this.TabList) {
             this.ShowTab(tabName);
