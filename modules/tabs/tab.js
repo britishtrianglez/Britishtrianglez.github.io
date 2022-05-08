@@ -106,7 +106,7 @@ class Tabs {
         }
 
 
-        if ((JSON.parse(container.getAttribute("landing")) || optinos?.landing) == true) {
+        if ((JSON.parse(container.getAttribute("landing")) || options?.landing) == true) {
 
             // debugger;
             if (JSON.parse(container.getAttribute("hidden")) != false)
