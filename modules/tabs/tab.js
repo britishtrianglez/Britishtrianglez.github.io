@@ -8,7 +8,10 @@ class Tabs {
         const linkToCss = options?.linkToCss || "modules/tabs/tabs.css";
         // linkToCss = linkToCss || "modules/tabs/tabs.css";
         this.Scroll = JSON.parse(options?.Scroll || Element.getAttribute("Scroll"));
+
         this.CurrentTab;
+        this.DefaultTab;
+
 
         this.container = Element;
         this.TabList = {};
@@ -45,33 +48,67 @@ class Tabs {
 
         this._root.appendChild(this.ContentContainer);
         // Convert Children to Tabs
-    
+
         Array.from(this.container.children).forEach(child => {
-            this.InsertTag(
+            this.InsertTab(
                 child.getAttribute("name") || "Default",
                 child);
         });
         if (this.Scroll) {
             setTimeout(() => {
-                this.TabList[fstChild.slot].tab.setAttribute("Selected",true);
+                this.TabList[fstChild.slot].tab.setAttribute("Selected", true);
                 this.CurrentTab = fstChild.slot;
-            },500);
+            }, 500);
+        }
+        // Get First Element then find first availble tab
+        if (!this.container.getAttribute("DefaultTab")) {
+
+            let nameCheck = this.container.firstElementChild.slot;
+            let done = false; 
+            while (done == false && this.TabList[nameCheck].tab.nextElementSibling) {
+                console.log(`Try And Select Tab ${nameCheck}`);
+                done = this.SelectTabIfVisible(this.TabList[nameCheck].tab.nextElementSibling.returnName);
+                nameCheck = this.TabList[nameCheck].tab.nextElementSibling.returnName;
+            }
+            if (done == false && this.Lander) {
+                this.SelectTab(this.Lander)
+            } else if (done == false ) {
+
+                this.SelectTab(this.ContentContainer.firstElementChild.slot);
+            }
+
         }
     }
-    /**
-     * 
+    // Create Landing Element ( What is shown if no tabs are pressent )
+    CreateLandingElement(TabContent) {
+        TabContent.parentElement.removeChild(TabContent);
+        this.container.prepend(TabContent);
+        this.Lander = TabContent;
+        // this.container.appendChild(container);
+    }
+    /** 
      * @param {String} name 
      * @param {HTMLElement} container 
      * @param { {closable: Boolean, disabled: Boolean, hidden:Boolean} } options
      */
-    InsertTag(name, container, options) {
+    InsertTab(name, container, options) {
         // Find Names
         container.style.display = "block";
         options = {
             closable: JSON.parse(options?.closable || container.getAttribute("closable") || false),
             disabled: JSON.parse(options?.disabled || container.getAttribute("disabled") || false),
-            hidden: JSON.parse(options?.hidden || container.getAttribute("hidden") || false)
+            hidden: JSON.parse(options?.hidden || container.getAttribute("hidden") || false),
         }
+
+
+        if (JSON.parse(container.getAttribute("landing")) == true) {
+            
+            if (options.hidden != false) {
+                options.hidden = true;
+            }
+            
+            options.closable = false;
+        }   
 
         var found = false;
         var newName = name;
@@ -89,10 +126,10 @@ class Tabs {
             }
             Iteration++;
         }
-        
+
         // Insert new tab
 
-        // Create Slot
+        // Create Slot - To Show Tabs
         let Slot = document.createElement("slot");
         Slot.name = newName;
         if (!this.Scroll) {
@@ -101,7 +138,8 @@ class Tabs {
         this.ContentContainer.appendChild(Slot);
 
         container.slot = newName;
-        // Create Switch
+
+        // Create Tab for tab ment
         let tab = document.createElement("div");
         tab.classList.add("TabButton");
         tab.innerText = newName;
@@ -111,21 +149,19 @@ class Tabs {
         tab.closeButton = document.createElement("div");
         tab.closeButton.classList.add("TabCloseButton");
 
+        // Add Style for Closebutton hover effecy
         tab.closeButton.addEventListener("mouseover", (e) => {
-            console.log("MouseOver");
             tab.setAttribute("CloseHovered", true);
         });
         tab.closeButton.addEventListener("mouseleave", (e) => {
-            console.log("MouseLEave");
             tab.removeAttribute("CloseHovered");
         });
         tab.appendChild(tab.closeButton);
 
         container.style.transition = "background 0.5s ease";
 
-        if (container.parentElement != this.parentElement) {
-
-            container.parentElement.removeChild(container);
+        if (container.parentElement != this.container) {
+            container.parentElement?.removeChild(container);
             this.container.appendChild(container);
 
         }
@@ -140,12 +176,19 @@ class Tabs {
         } else {
             tab.setAttribute("disabled", true);
         }
+        // Tab => Set anility to return name
+        tab["returnName"] = newName;
+
+        if (JSON.parse(container.getAttribute("landing")) == true) {
+            this.Lander = newName;
+        }
 
         this.TabList[newName] = {
             tab: tab,
             slot: Slot,
             isClosable: options?.closable || false,
             isDisabled: options?.disabled || false,
+            isHidden: options?.hidden || false,
             selectTab: (shouldHighlight) => {
                 if (this.Scroll) {
                     Slot.scrollIntoView();
@@ -183,12 +226,50 @@ class Tabs {
                 }
             },
             closeTab: () => {
+                
+                let done = false;
+                // Check if selected tab is being closed ( if not ignore reselecting tab)
+                if (this.CurrentTab != newName) {
+                    done = true;
+                }
+                // Disable Tab ( Auto Deselets tab and removes listeners )
                 this.DisableTab(newName);
+
+
+                    let checkName = newName;
+                    // Loops threw all siblin tabs for next available tab
+                    while (done == false && this.TabList[checkName].tab.nextElementSibling) {
+                        console.log(`Try And Select Tab ${checkName}`);
+                        done = this.SelectTabIfVisible(this.TabList[checkName].tab.nextElementSibling.returnName);
+                        checkName = this.TabList[checkName].tab.nextElementSibling.returnName;
+                    }
+                    // Loops threw all previous tabs for next available tab
+                    if (done == false) {
+                        checkName = newName;
+                        console.log(`Try And Select Tab ${checkName}`);
+                        while (done == false && this.TabList[checkName].tab.previousElementSibling) {
+                            done = this.SelectTabIfVisible(this.TabList[checkName].tab.previousElementSibling.returnName);
+                            checkName = this.TabList[checkName].tab.previousElementSibling.returnName;
+                        }
+                    }
+                    // If no tabs where found select lander tab ( if availble )
+                    if (done == false && this.Lander) {
+                        this.SelectTab(this.Lander)
+                    }
+                
                 Slot.parentElement.removeChild(Slot);
                 tab.parentElement.removeChild(tab);
                 container.parentElement.removeChild(container);
+
+                if (this.Lander == newName) {
+                    delete this.Lander;
+                }
+
                 this.TabList[newName] = undefined;
                 delete this.TabList[newName];
+
+
+
             }
         }
         if (options?.disabled != true) {
@@ -229,10 +310,22 @@ class Tabs {
         if (!this.TabList[name]) {
             throw new Error("Tab Dont Exist", name);
         }
-
         this.TabList[this.CurrentTab]?.deselectTab();
         this.TabList[name].selectTab(shouldHighlight);
         this.CurrentTab = name;
+    }
+    SelectTabIfVisible(name, shouldHighlight) {
+        console.log(`Try And Select Tab ${name}`);
+
+        if (!this.TabList[name]) {
+            throw new Error("Tab Don't Exist", name);
+        }
+        if (!this.TabList[name].isHidden) {
+            this.SelectTab(name, shouldHighlight);
+            return true;
+        } else {
+            return false;
+        }
     }
     EnableTab(name) {
         if (!this.TabList[name]) {
@@ -265,6 +358,7 @@ class Tabs {
             }
         }
 
+        this.TabList[name].isHidden = true;
         this.TabList[name].tab.classList.add("NoDisplay");
     }
     ShowTab(name, selectTab) {
@@ -274,10 +368,15 @@ class Tabs {
         if (selectTab == true) {
             this.SelectTab(name);
         }
+        this.TabList[name].isHidden = false;
         this.TabList[name].tab.classList.remove("NoDisplay");
     }
 
-
+    UnhideAll () {
+        for (let tabName in this.TabList) {
+            this.ShowTab(tabName);
+        }
+    }
     // Toggle Closable
 }
 
