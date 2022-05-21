@@ -8,6 +8,7 @@ class Tabs {
         const linkToCss = options?.linkToCss || Element.getAttribute("linkToCss") ||"modules/tabs/tabs.css";
         // linkToCss = linkToCss || "modules/tabs/tabs.css";
         this.Scroll = JSON.parse(options?.scroll || Element.getAttribute("Scroll"));
+
         
         
         
@@ -18,7 +19,6 @@ class Tabs {
         this.TabList = {};
         
         this.DefaultTab = this.container.getAttribute("Default") || options?.default;
-        
         
         this.container.classList.remove("TabInit");
         this.container.classList.add("TabContainer");
@@ -33,8 +33,6 @@ class Tabs {
         // Generate Tab Selector
         this.TabSelector = document.createElement("div");
         this.TabSelector.classList.add("TabMenu");
-
-        // this.TabSelector.style.position = "absolute";
 
         this._root.appendChild(this.TabSelector);
 

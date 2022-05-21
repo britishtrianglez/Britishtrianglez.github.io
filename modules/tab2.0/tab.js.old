@@ -1,0 +1,35 @@
+        // Create Menu Positon Handler
+        Object.defineProperty(this, "menuPosition", { 
+            get : () => {
+                return this.TabSelector.getAttribute("menuPosition") || "TOP";
+            },
+            set : data => {
+                
+                switch (data.toUpperCase()) {
+                    case "LEFT" : {
+                        this.TabSelector.setAttribute("menuPosition", "LEFT");
+                        // this.container.setAttribute("MenuPosition", "Left");
+                        break;
+                    }
+                    case "RIGHT" : {
+                        this.TabSelector.setAttribute("menuPosition", "RIGHT");
+                        // this.container.setAttribute("MenuPostion", "Right");
+                        break;
+                    }
+                    case "BOTTOM" : {
+                        this.TabSelector.setAttribute("menuPosition", "BOTTOM");
+                        // this.container.setAttribute("MenuPosition", "BOTTOM");
+                        break;
+                    }
+                    default : {
+                        this.TabSelector.removeAttribute("menuPosition");
+                        // this.container.removeAttribute("MenuPosition");
+                        break;
+                    }
+                }
+
+
+            }
+        })
+        this.menuPosition = options?.MenuLocation || Element.getAttribute("menuPosition") || "Top";
+        Element.removeAttribute("MenuLocation");
