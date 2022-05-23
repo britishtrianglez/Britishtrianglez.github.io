@@ -69,6 +69,7 @@ class Tab {
         this.Name = name;
         this.isDisabled = JSON.parse(options?.disabled || container.getAttribute("disabled") || false);
         this.isClosable = JSON.parse(options?.closable || container.getAttribute("closable") || false);
+        this.isVisible = JSON.parse(options?.Visible || container.getAttribute("visible") || true)
     }
 
     deselectTab () {
@@ -79,6 +80,23 @@ class Tab {
         this.tabControl.setAttribute("Selected", true);
         this.slot.style.display = "block";
     }
+    // Set Visibilty
+    get isVisible () {
+        return this.__Data__.isVisible;
+    }
+    set isVisible (property) {
+        if (property) {
+            
+            this.__Data__.isVisible = true;
+            this.tabControl.style.display = "grid";
+
+
+        } else {
+            this.__Data__.isVisible = false;
+            this.tabControl.style.display = "none";
+        }
+    }
+
 
     get isClosable () {
         return this.__Data__.isClosable;
@@ -185,13 +203,19 @@ class Tabs {
         this._root.appendChild(this.ContentConainer);
         
 
-        
+        let FirstChild;
         Array.from(this.container.children).forEach(child => {
-            this.InsertTab(
+            let resp = this.InsertTab(
                 child.getAttribute("name") || "Default",
                 child);
+        if (FirstChild == undefined) {
+            FirstChild = resp;
+        }
+
         });
 
+        // Select Default or first child
+        this.SelectedTab = this.container.getAttribute("default") || FirstChild;
     }
     getNewTabName (name) {
         let found = false;
@@ -220,6 +244,7 @@ class Tabs {
         this.TabSelecter.appendChild(newTab.tabControl);
         this.TabList[newTab.Name] = newTab;
         this.ContentConainer.appendChild(newTab.slot);
+        return newTab.Name;
     }
     // Close Tab
     closeTab (tab) {
@@ -247,19 +272,19 @@ class Tabs {
             if (!this.TabList[tab.Name]) {
                 throw new Error("Tab Don't Exist in this TabList", tab);
             }
-
+            // debugger;
             this.SelectedTab?.deselectTab();
             this.TabList[tab.Name].selectTab();
             this.__Data__.CurrentTab = tab;
         } else {
             if (!this.TabList[tab]) {
-                throw new Error("Tab Don't Exist in TabList", tabName);
+                throw new Error("Tab Don't Exist in TabList", tab);
             }
+            this.SelectedTab = this.TabList[tab];
 
-
-            this.SelectedTab?.deselectTab();
-            this.TabList[tab].selectTab();
-            this.__Data__.CurrentTab = tabName;
+            // this.SelectedTab?.deselectTab();
+            // this.TabList[tab].selectTab();
+            // this.__Data__.CurrentTab = tab;
         }
 
 

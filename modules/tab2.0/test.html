@@ -24,7 +24,7 @@
         <!-- <div name="Landing" closable="true">
             <h1>Hello World</h1>    
         </div> -->
-        <div name="Landing Page Example" closeable="true" landing="true">
+        <div name="Landing Page Example" closeable="true" landing="true" visible="true">
             <button id="BtnNew">Create Example Tab</button>
             <h3>This will only be shown as default if hidden is false</h3>
             <script>
@@ -51,21 +51,15 @@
 
         </div>
 
-        <div name="Second Page"  closable="true" hidden="false">
+        <div name="Second Page"  closable="true" visible="false">
             <h1>Example Closable Tab</h1>
         </div>
 
-        <div name="Landing Page" closable="true" hidden="true">
+        <div name="Landing Page" closable="true" visible="false">
             <h2>Not A Landing PAGE!!!</h2>
             <h3>Default will ignore hidden option</h3>
             <h3>Hiding a tab will deselect said tab unless specified not to</h3>
-            <button onclick="
-                    if (MainTab.TabList['Landing Page'].isHidden) {
-                        MainTab.ShowTab('Landing Page');
-                    } else {
-                        MainTab.HideTab('Landing Page', false);
-                    }
-            ">Hide/Show this tab</button>
+            <button onclick="MainTab.TabList['Landing Page'].isVisible = !MainTab.TabList['Landing Page'].isVisible;">Hide/Show this tab</button>
 
         </div>
     </div>
