@@ -71,7 +71,13 @@ class Tab {
         this.isClosable = JSON.parse(options?.closable || container.getAttribute("closable") || false);
         this.isVisible = JSON.parse(options?.Visible || container.getAttribute("visible") || true)
     }
+    // for checking defaults
 
+    // Remove Elements from parents
+    deleteSelf () {
+        this.tabControl.parentElement.removeChild(this.tabControl);
+        this.slot.parentElement.removeChild(this.slot);
+    }
     deselectTab () {
         this.tabControl.removeAttribute("Selected");
         this.slot.style.display = "none";
@@ -151,7 +157,16 @@ class Tab {
 
 
     }
-
+    moveToEnd () {
+        let parent = this.tabControl.parentElement;
+        parent.removeChild(this.tabControl);
+        parent.appendChild(this.tabControl);
+    }
+    moveToStart () {
+        let parent = this.tabControl.parentElement
+        parent.removeChild(this.tabControl);
+        parent.prepend(this.tabControl);
+    }
 
     onSelect;
     onClose;
@@ -163,7 +178,7 @@ class Tabs {
     /**
      * 
      * @param {HTMLElement} Element 
-     * @param {{ linkToCss : Path, Scroll : Boolean }} options 
+     * @param {{ linkToCss : Path, Scroll : Boolean, TabLocation }} options 
      */
     constructor(Element, options) {
 
@@ -173,7 +188,8 @@ class Tabs {
 
         this.__Data__ = {
             DefaultTab: undefined,
-            CurrentTab: undefined
+            CurrentTab: undefined,
+            TabLocation: undefined
         }
 
         this.TabList = {};
@@ -187,6 +203,11 @@ class Tabs {
 
         // Attach Root
         this._root = this.container.attachShadow({mode:"open"})
+        // Root Container
+        this._rootBody = document.createElement("div");
+        this._rootBody.classList.add("TabList_Shadow");
+        this._root.appendChild(this._rootBody);
+
         // Input CSS
         let link = document.createElement("link");
         link.rel = "stylesheet";
@@ -195,12 +216,12 @@ class Tabs {
         // Create selecter element
         this.TabSelecter = document.createElement("div");
         this.TabSelecter.classList.add("TabMenu");
-        this._root.appendChild(this.TabSelecter);
+        this._rootBody.appendChild(this.TabSelecter);
 
         // Create Content Area
         this.ContentConainer = document.createElement("div");
         this.ContentConainer.classList.add("TabContent");
-        this._root.appendChild(this.ContentConainer);
+        this._rootBody.appendChild(this.ContentConainer);
         
 
         let FirstChild;
@@ -216,6 +237,7 @@ class Tabs {
 
         // Select Default or first child
         this.SelectedTab = this.container.getAttribute("default") || FirstChild;
+        this.MenuStyle =options?.MenuStyle || Element.getAttribute("MenuStyle") || "TOP"
     }
     getNewTabName (name) {
         let found = false;
@@ -239,6 +261,28 @@ class Tabs {
 
         return newName;
     }
+//  Tab Locations 
+    get MenuStyle () {
+        return this.__Data__.TabLocation;
+    }
+    set MenuStyle (location) {
+
+        switch (location.toUpperCase())
+        {
+            case "VERTICAL" : {
+                this.TabSelecter.setAttribute("TabLocation", "VERT");
+                this._rootBody.classList.add("TabList_Shadow");
+                break;
+            }
+            case "HORISONTAL":
+            default: {
+                this._rootBody.classList.remove("TabList_Shadow");
+                this.TabSelecter.removeAttribute("TabLocation");
+                break;
+            }
+        }
+    }
+
     InsertTab (name, container, options) {
         let newTab = new Tab(name,container,options, this);
         this.TabSelecter.appendChild(newTab.tabControl);
@@ -248,21 +292,27 @@ class Tabs {
     }
     // Close Tab
     closeTab (tab) {
-        if (tab instanceof Tab) {
+        // Convert Tab into Tab Instance ( if required )
+        if (!tab instanceof Tab)
+        {
             if (!this.TabList[tab.Name])
             {
-                throw new Error ("Tab Don't Exist in tablist :", tab)
+                throw new Error ( "Tab Don't Exist in tablist :", tab);
             }
-
-            console.log("Closing Tab!!!", tab.Name);
-        } else {
-            if (!this.TabList[tab]) {
-                throw new Error ("Tab Don't Exist in tablist :", tab);
-            }
-
-            console.log("Closing tab!!!", tab);
+            tab = this.TabList[tab];
         }
+
+        tab.deleteSelf();
+
+        if (this.DefaultTab == tab.name){
+            this.DefaultTab = undefined;
+        }
+
+        this.TabList[tab.name] = undefined;
+        delete this.TabList[tab.name];
+        
     }
+
     // Current - Selected tab
     get SelectedTab () {
         return this.__Data__.CurrentTab;
@@ -306,6 +356,21 @@ class Tabs {
         }
 
     }
+
+    HideAllTabs(hideDefault) {
+        for (var tabName in this.TabList) {
+            this.TabList[tabName].isVisible = false;
+        }
+        if (hideDefault != true && this.DefaultTab != undefined) {
+            this.TabList[tabName].isVisible = true;
+        }
+    }
+    ShowAllTabs () {
+        for (var tabName in this.TabList) {
+            this.TabList[tabName].isVisible = true;
+        }
+    }
+
 }
 
 document.onreadystatechange = () => {
