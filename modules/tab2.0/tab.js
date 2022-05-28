@@ -8,7 +8,7 @@ class Tab {
                  */
                 TabClick : (e) => {
                     
-                    if (e.path[0] == this.tabControl.closeButton)
+                    if (e.composedPath()[0] == this.tabControl.closeButton)
                     {
                         return;
                     }
@@ -45,13 +45,11 @@ class Tab {
         this.slot.style.display = "none";
         this.container = container;
 
-//         Move Tab content into Tab Container Automaticly
-        if (this.container.parentElement != this.parent.container)
-        {
-            this.container.parentElement.removeChild(this.container);
+        if (this.container.parentElement != this.parent.container) {
+            this.container.parentElement?.removeChild(this.container);
             this.parent.container.appendChild(this.container);
         }
-        
+
         // Create Tab Select Button
         this.tabControl = document.createElement("div");
         this.tabControl.classList.add("TabButton");
@@ -72,14 +70,23 @@ class Tab {
         })
 
         this.tabControl.appendChild(this.tabControl.closeButton);
-    
-        this.Name = name;
+        // Get First Name
+        // (This Way Prevents rename event triggering )
+        this.__Data__.name = this.parent.getNewTabName(name);
+        this.updateSlot(this.__Data__.name)
+
         this.isDisabled = JSON.parse(options?.disabled || container.getAttribute("disabled") || false);
         this.isClosable = JSON.parse(options?.closable || container.getAttribute("closable") || false);
         this.isVisible = JSON.parse(options?.Visible || container.getAttribute("visible") || true)
     }
     // for checking defaults
-
+    updateSlot (SlotText) {
+        // Rename Slot info
+        this.slot.name =  SlotText;
+        this.container.slot =  SlotText;
+        // Change Tab Selector Text
+        this.tabControl.span.innerText = SlotText;
+    }
     // Remove Elements from parents
     deleteSelf () {
         this.tabControl.parentElement.removeChild(this.tabControl);
@@ -150,17 +157,14 @@ class Tab {
             property = "New Tab";
         }
 
-
+    // Checks if name is unique within TabController
         property = this.parent.getNewTabName(property);
-
-
+    // Tells parent to rename tab within tablist
+        this.parent.renameTab(this.Name, property);
+    
         this.__Data__.name = property;
         
-        // Rename Slot info
-        this.slot.name = property;
-        this.container.slot = property;
-        // Change Tab Selector Text
-        this.tabControl.span.innerText = property;
+        this.updateSlot(property);
 
 
     }
@@ -242,10 +246,8 @@ class Tabs {
 
         });
 
-        // Select Default or first child if element has child
-            
-        if (this.container.children.length > 0)
-        {        
+        // Select Default or first child
+        if ( this.container.children.length > 0 ) {
             this.SelectedTab = this.container.getAttribute("default") || FirstChild;
         }
         this.MenuStyle =options?.MenuStyle || Element.getAttribute("MenuStyle") || "TOP"
@@ -264,7 +266,8 @@ class Tabs {
             } else {
                 newName = name + " " + iteration;
             }
-            if (this.TabList[newName] != undefined) {
+            // incase tablist is empty ( no tabs have been initilised yet )
+            if (this.TabList?.[newName] != undefined) {
                 found = false;
             }
             iteration++;
@@ -272,6 +275,7 @@ class Tabs {
 
         return newName;
     }
+
 //  Tab Locations 
     get MenuStyle () {
         return this.__Data__.TabLocation;
@@ -300,6 +304,19 @@ class Tabs {
         this.TabList[newTab.Name] = newTab;
         this.ContentConainer.appendChild(newTab.slot);
         return newTab.Name;
+    }
+    // Rename Tab
+    renameTab (oldName, newName) {
+        if (!this.TabList[oldName]){
+            throw new Error ("Tab Don't Exist in tablist", oldName);
+        }
+
+        // Check newName
+        newName = this.getNewTabName(newName);
+        // Actualy rename
+        this.TabList[newName] = this.TabList[oldName];
+        this.TabList[oldName] = undefined;
+        delete this.TabList[oldName];
     }
     // Close Tab
     closeTab (tab) {
@@ -383,7 +400,6 @@ class Tabs {
     }
 
 }
-
 document.onreadystatechange = () => {
     if (document.readyState == "complete") {
         let TabIndex = 0;
