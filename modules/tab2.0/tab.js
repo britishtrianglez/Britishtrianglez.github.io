@@ -45,6 +45,13 @@ class Tab {
         this.slot.style.display = "none";
         this.container = container;
 
+//         Move Tab content into Tab Container Automaticly
+        if (this.container.parentElement != this.parent.container)
+        {
+            this.container.parentElement.removeChild(this.container);
+            this.parent.container.appendChild(this.container);
+        }
+        
         // Create Tab Select Button
         this.tabControl = document.createElement("div");
         this.tabControl.classList.add("TabButton");
@@ -235,15 +242,19 @@ class Tabs {
 
         });
 
-        // Select Default or first child
-        this.SelectedTab = this.container.getAttribute("default") || FirstChild;
+        // Select Default or first child if element has child
+            
+        if (this.container.children.length > 0)
+        {        
+            this.SelectedTab = this.container.getAttribute("default") || FirstChild;
+        }
         this.MenuStyle =options?.MenuStyle || Element.getAttribute("MenuStyle") || "TOP"
     }
     getNewTabName (name) {
         let found = false;
         let newName = name;
         let iteration = 0;
-        while (found = false)
+        while (found == false)
         {
             found = true; 
          
