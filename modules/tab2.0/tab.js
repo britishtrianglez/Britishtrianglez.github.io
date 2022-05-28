@@ -91,6 +91,7 @@ class Tab {
     deleteSelf () {
         this.tabControl.parentElement.removeChild(this.tabControl);
         this.slot.parentElement.removeChild(this.slot);
+        this.container.parentElement.removeChild(this.container);
     }
     deselectTab () {
         this.tabControl.removeAttribute("Selected");
@@ -321,24 +322,37 @@ class Tabs {
     // Close Tab
     closeTab (tab) {
         // Convert Tab into Tab Instance ( if required )
-        if (!tab instanceof Tab)
+        if (tab instanceof Tab)
         {
-            if (!this.TabList[tab.Name])
+            tab = tab.Name;
+        }
+
+        if (!this.TabList[tab])
             {
                 throw new Error ( "Tab Don't Exist in tablist :", tab);
             }
-            tab = this.TabList[tab];
-        }
+        
+        this.TabList[tab].deleteSelf();
+        // tab.deleteSelf();
+        
 
-        tab.deleteSelf();
-
-        if (this.DefaultTab == tab.name){
+        if (this.DefaultTab == tab){
             this.DefaultTab = undefined;
         }
+        let deleteMe = this.TabList[tab];
+        deleteMe = undefined;
+        deleteMe = null;
 
-        this.TabList[tab.name] = undefined;
-        delete this.TabList[tab.name];
-        
+        this.TabList[tab] = undefined;
+        delete this.TabList[tab];
+    
+
+        if ( Object.keys(this.TabList).length == 0 ) {
+            if (this.onAllClose)
+            {
+                this.onAllClose.call(this);
+            }
+        }
     }
 
     // Current - Selected tab
@@ -398,7 +412,7 @@ class Tabs {
             this.TabList[tabName].isVisible = true;
         }
     }
-
+    onAllClose
 }
 document.onreadystatechange = () => {
     if (document.readyState == "complete") {
