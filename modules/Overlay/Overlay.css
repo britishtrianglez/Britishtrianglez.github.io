@@ -1,0 +1,15 @@
+.Overlay-Class {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position:fixed;
+
+    pointer-events: none;    
+    background:rgba(200,200,100,0.3);
+
+    top:0px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+
+}
