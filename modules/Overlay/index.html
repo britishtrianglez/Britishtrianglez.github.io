@@ -7,8 +7,35 @@
     <script src="./CreateOverlay.js"></script>
     <script src="./Notification/notification.js"></script>
     <link rel="stylesheet" href="./Overlay.css">
+    <!-- <link rel="stylesheet" href="/modules/Overlay/notification/notification.css"> -->
 </head>
 <body>
     
+
+<script>
+
+let ExNotification = new Notification("Example Title", "This is the message", {closable: false, timeout: 5000});
+let Ex1Notification = new Notification("Example Title2", "This is the message2", {timeout: 5000});
+let Ex2Notification = new Notification("Example Title3", "This is the message3", {timeout: 5000});
+
+Ex1Notification.onClose = (e) => {
+    console.log(e, this);
+    return true;
+}
+
+Overlay.AddPlugin("Notifications", NotificationPlugin("/modules/Overlay/notification/notification.css"));
+Overlay.Notifications.addNotification(ExNotification)
+
+setTimeout(() => {
+    Overlay.Notifications.addNotification(Ex1Notification)
+    // setTimeout(() => {
+    Overlay.Notifications.addNotification(Ex2Notification)
+    // },5000)
+},50)
+
+
+
+</script>
+
 </body>
 </html>
