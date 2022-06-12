@@ -14,15 +14,17 @@
             padding: 0px;
             margin: 0px;
         }
-
     </style>
+
+    <script src="./modules/overlay.js" type="module"></script>
 </head>
+
 <body>
 
     <h1><a href="modules/Overlay/">Overlay Functions</a></h1>
 
 
-    <div class="TabInit" id="MainTab" scroll="false" MenuStyle="vertical"  default="Landing Page">
+    <div class="TabInit" id="MainTab" scroll="false" MenuStyle="vertical" default="Landing Page">
 
         <!-- <div name="Landing" closable="true">
             <h1>Hello World</h1>    
@@ -32,13 +34,13 @@
             <h3>This will only be shown as default if hidden is false</h3>
             <script>
                 document.getElementById("BtnNew").addEventListener("click", () => {
-                    
+
                     let newTab = document.createElement('div');
                     newTab.innerHTML = `<h1>Hello World!! </h1><h2>Wow A new Tab</h2>`;
                     MainTab.InsertTab('New Tab', newTab);
 
                 })
-                </script>
+            </script>
         </div>
         <div name="First Default Tab" closable="false">
             <h2>Non Closable Default tab</h2>
@@ -54,7 +56,7 @@
 
         </div>
 
-        <div name="Second Page"  closable="true" hidden="false">
+        <div name="Second Page" closable="true" hidden="false">
             <h1>Example Closable Tab</h1>
         </div>
 
@@ -73,6 +75,18 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('readystatechange', event => {
+            if (event.target.readyState === 'interactive') {
+                let NewNot = new CNotification("Notifications have been renamed", "Due to the fact that javascript already has a OS level notification system, this needed to be renamed. ( Also its now a module imported in a single js file!");
+                            Overlay.Notifications.addNotification(NewNot);
+                            console.log("Adding Notification");
+            }
+            else if (event.target.readyState === 'complete') {
+                initApp();
+            }
+        });
+    </script>
 </body>
 
 </html>

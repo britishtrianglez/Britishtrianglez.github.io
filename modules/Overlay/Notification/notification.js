@@ -1,4 +1,4 @@
-let NotificationPlugin = (linkToCss) => {
+export function NotificationPlugin (linkToCss) {
     return {
         
         CurrentNotifications: [],
@@ -6,7 +6,7 @@ let NotificationPlugin = (linkToCss) => {
         
         /**
          * 
-         * @param {Notification} Notification 
+         * @param {CNotification} Notification 
          */
         addNotification(Notification) {
             this.CurrentNotifications.push(Notification);
@@ -48,7 +48,7 @@ let NotificationPlugin = (linkToCss) => {
     }
 };
 
-class Notification {
+export class CNotification {
     /**
      * 
      * @param {String} title 
