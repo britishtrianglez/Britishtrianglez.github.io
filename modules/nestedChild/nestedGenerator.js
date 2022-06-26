@@ -1,4 +1,4 @@
-function Generator(data) {
+function NestedGenerator(data) {
 
     if (!data instanceof Object) {
         return;
