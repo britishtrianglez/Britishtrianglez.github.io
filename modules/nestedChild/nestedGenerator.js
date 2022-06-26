@@ -45,7 +45,7 @@ function NestedGenerator(data) {
     if (data.attributes) {
         if (data.attributes instanceof Object) 
         {
-            for (prop in data.attributes){
+            for (var prop in data.attributes){
                 el.setAttribute(prop, data.attributes[prop]);
             }
         }
@@ -54,7 +54,7 @@ function NestedGenerator(data) {
         if (data.events instanceof Object)
         {
 
-            for (prop in data.events) {
+            for (var prop in data.events) {
                 el.addEventListener(prop, data.events[prop]);
             }
         }
