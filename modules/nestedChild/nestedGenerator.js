@@ -3,9 +3,9 @@ function NestedGenerator(data) {
     if (!data instanceof Object) {
         return;
     }
-    // debugger;
-    let el = document.createElement(data.type || "div");
-    // let el = document.createElement("div");
+    
+    // let el = document.createElement(data.type || "div");
+    let el = document.createElement("div");
 
     if (data.id) {
         el.id = data.id;
@@ -13,8 +13,6 @@ function NestedGenerator(data) {
 
     if (data.classList) {
         if (data.classList instanceof Array) {
-
-            console.log("Class Array");
             data.classList.forEach(ElementClass => {
                 el.classList.add(ElementClass);
             })
@@ -28,7 +26,7 @@ function NestedGenerator(data) {
             if (child instanceof HTMLElement) {
                 el.appendChild(child);
             }else if (child instanceof Object) {
-                el.appendChild(Generator(child));
+                el.appendChild(NestedGenerator(child));
             } else {
                 let c = document.createElement("span");
                 c.innerHTML = child;
@@ -44,7 +42,14 @@ function NestedGenerator(data) {
             el.innerHTML = data.value;
         }
     }
-
+    if (data.attributes) {
+        if (data.attributes instanceof Object) 
+        {
+            for (prop in data.attributes){
+                el.setAttribute(prop, data.attributes[prop]);
+            }
+        }
+    }
     if (data.events) {
         if (data.events instanceof Object)
         {
@@ -61,7 +66,7 @@ function NestedGenerator(data) {
 
 onload = () => {
 document.body.appendChild(
-    Generator (
+    NestedGenerator (
         
         {
             type: "menu", 
@@ -87,11 +92,17 @@ document.body.appendChild(
                     },
                     {
                         type: 'li',
-                        value: "Test"
+                        value: "Test",
+                        attributes: {
+                            selected: false
+                        }
                     },
                     {
                         type: 'li',
-                        value: "Test2"
+                        value: "Test2",
+                        attributes : {
+                            fuckYou: 'Fuck Me '
+                        }
                     },
                     {
                         type: 'li',
