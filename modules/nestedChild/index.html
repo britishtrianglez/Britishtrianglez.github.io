@@ -4,9 +4,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="./nestedGenerator.js"></script>
+    <script src="./nestedGeneratorMk2.js"></script>
 </head>
 <body>
-    
+    <script>
+        var menu = {
+            type: "div",
+            classList: ["MenuType"],
+            value: [
+                {
+                    type: "div",
+                    classList: ["CHILD"],
+
+                }
+            ],
+            update: function () {
+                console.log("Check", this);
+            }
+        }
+        var GenEl =  NestedGenerator(menu)
+        document.body.appendChild(
+            GenEl
+        );
+
+
+    </script>
 </body>
 </html>

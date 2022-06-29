@@ -1,17 +1,29 @@
-function NestedGenerator(data) {
-
+globalThis.NestedGenerator = (data) => {
+    if (data instanceof Element) {
+        return data;
+    }
     if (!data instanceof Object) {
         return;
     }
     
-    // let el = document.createElement(data.type || "div");
-    let el = document.createElement("div");
+    let el = document.createElement(data.type || "div");
+    // let el = document.createElement("div");
 
     if (data.id) {
+
+        if (data.id instanceof Function) {
+            data.id = data.id();
+        }
+
         el.id = data.id;
     }
 
     if (data.classList) {
+
+        if (data.classList instanceof Function) {
+            data.classList = data.classList();
+        }
+
         if (data.classList instanceof Array) {
             data.classList.forEach(ElementClass => {
                 el.classList.add(ElementClass);
@@ -21,10 +33,16 @@ function NestedGenerator(data) {
         }
     }
 
+    if (data.value instanceof Function) {
+        data.value = data.value();
+    }
+
     if (data.value instanceof Array) {
         data.value.forEach(child => {
             if (child instanceof HTMLElement) {
                 el.appendChild(child);
+            } else if (child instanceof Function) {
+                el.appendChild(NestedGenerator( child() ));
             }else if (child instanceof Object) {
                 el.appendChild(NestedGenerator(child));
             } else {
@@ -37,7 +55,9 @@ function NestedGenerator(data) {
         if (data.value instanceof HTMLElement) {
             el.appendChild(data.value);
         } else if (data.value instanceof Object) {
-            el.appendChild(Generator(data.value));
+            el.appendChild(NestedGenerator(data.value));
+        } else if (data.value instanceof Function) {
+            el.appendChild(NestedGenerator( data.value() ));
         } else {
             el.innerHTML = data.value;
         }
@@ -45,8 +65,16 @@ function NestedGenerator(data) {
     if (data.attributes) {
         if (data.attributes instanceof Object) 
         {
-            for (var prop in data.attributes){
-                el.setAttribute(prop, data.attributes[prop]);
+            for (let prop in data.attributes){
+
+                if (data.attributes[prop] instanceof Function) {
+
+                    el.setAttribute(prop, data.attributes[prop]() );
+
+                } else {
+                    el.setAttribute(prop, data.attributes[prop]);
+                }
+
             }
         }
     }
@@ -54,7 +82,7 @@ function NestedGenerator(data) {
         if (data.events instanceof Object)
         {
 
-            for (var prop in data.events) {
+            for (let prop in data.events) {
                 el.addEventListener(prop, data.events[prop]);
             }
         }
@@ -62,59 +90,4 @@ function NestedGenerator(data) {
     }
 
     return el;
-}
-
-onload = () => {
-document.body.appendChild(
-    NestedGenerator (
-        
-        {
-            type: "menu", 
-            classList: ['TopMenu'],
-            id : "menu",
-            value: [
-                
-                {
-                    type: "ul",
-                    classList: "MenuContainer",
-                    value: [
-                        
-                    {
-                        type: 'li',
-                        value: "Text",
-                        events: {
-                            click : (e) => {
-                                e.preventDefault();
-                                console.log("FUCK CLICKED!!");
-                                console.log("E CLicked", e);
-                            }
-                        }
-                    },
-                    {
-                        type: 'li',
-                        value: "Test",
-                        attributes: {
-                            selected: false
-                        }
-                    },
-                    {
-                        type: 'li',
-                        value: "Test2",
-                        attributes : {
-                            fuckYou: 'Fuck Me '
-                        }
-                    },
-                    {
-                        type: 'li',
-                        value: "Text2"
-                    }
-                    
-                    
-                ]
-            }
-            
-        ]
-    }
-    
-    ))
 }
