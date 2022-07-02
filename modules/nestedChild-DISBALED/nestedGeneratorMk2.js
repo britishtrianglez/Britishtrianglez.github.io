@@ -5,7 +5,7 @@ globalThis.NestedGenerator = (data) => {
     if (!data instanceof Object) {
         return;
     }
-    
+
     let el = document.createElement(data.type || "div");
     // let el = document.createElement("div");
 
@@ -42,8 +42,8 @@ globalThis.NestedGenerator = (data) => {
             if (child instanceof HTMLElement) {
                 el.appendChild(child);
             } else if (child instanceof Function) {
-                el.appendChild(NestedGenerator( child() ));
-            }else if (child instanceof Object) {
+                el.appendChild(NestedGenerator(child()));
+            } else if (child instanceof Object) {
                 el.appendChild(NestedGenerator(child));
             } else {
                 let c = document.createElement("span");
@@ -57,19 +57,18 @@ globalThis.NestedGenerator = (data) => {
         } else if (data.value instanceof Object) {
             el.appendChild(NestedGenerator(data.value));
         } else if (data.value instanceof Function) {
-            el.appendChild(NestedGenerator( data.value() ));
+            el.appendChild(NestedGenerator(data.value()));
         } else {
             el.innerHTML = data.value;
         }
     }
     if (data.attributes) {
-        if (data.attributes instanceof Object) 
-        {
-            for (let prop in data.attributes){
+        if (data.attributes instanceof Object) {
+            for (let prop in data.attributes) {
 
                 if (data.attributes[prop] instanceof Function) {
 
-                    el.setAttribute(prop, data.attributes[prop]() );
+                    el.setAttribute(prop, data.attributes[prop]());
 
                 } else {
                     el.setAttribute(prop, data.attributes[prop]);
@@ -79,14 +78,20 @@ globalThis.NestedGenerator = (data) => {
         }
     }
     if (data.events) {
-        if (data.events instanceof Object)
-        {
+        if (data.events instanceof Object) {
 
             for (let prop in data.events) {
                 el.addEventListener(prop, data.events[prop]);
             }
         }
+
+    }
+
+    if (data.update instanceof Function) {
         
+        
+
+
     }
 
     return el;
