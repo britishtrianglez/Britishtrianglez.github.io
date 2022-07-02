@@ -132,9 +132,9 @@ NestedGenerator = (data) => {
                         target.Element.appendChild(child.Element);
                     }
                 } else {
-                    target_value[property_value] = value_value;
+                    target_value[property_value] = value_value ||"";
 
-                    target.Element.innerText = value_value;
+                    target.Element.innerText = value_value ||"";
                 }
 
                 return true;
@@ -147,8 +147,6 @@ NestedGenerator = (data) => {
             values.forEach(value => {
                 target.value.push(value);
             });
-        } else if (values instanceof Object) {
-            target.value.push(values);
         } else {
             target.value.push(values);
         }
