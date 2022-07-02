@@ -122,6 +122,14 @@ NestedGenerator = (data) => {
 
 
                     let child = NestedGenerator(value_value);
+                    child.parent = ReturnObject;
+                    if (ReturnObject.TopLevel == null) {
+                        child.TopLevel = ReturnObject;
+                    } else {
+                        child.TopLevel = ReturnObject.TopLevel;
+                    }
+
+
                     target_value[property_value] = child;
 
 
@@ -197,8 +205,13 @@ NestedGenerator = (data) => {
                 return true;
             },
             set: function (target, property, value, recieves) {
-                target[property] = value;
-                el.addEventListener(property, value);
+
+                let handler = function (e) {
+                    value.call(ReturnObject, e);
+                }
+
+                target[property] = handler;
+                el.addEventListener(property, handler);
                 return true;
             }
         });
@@ -257,6 +270,10 @@ NestedGenerator = (data) => {
     ReturnObject.attributes = data.attributes;
     ReturnObject.events = data.events;
     ReturnObject.style = data.style;
+    
+    ReturnObject.parent = null;
+    ReturnObject.TopLevel = null;
+
     return ReturnObject;
 }
 
@@ -292,10 +309,10 @@ var TestButton = {
         classList: "Clickable",
         id: "clickMe",
         events: {
-            click: (e) => {
+            click: function(e)  {
                 e.preventDefault();
-
                 alert("Clicking Worked!!");
+                console.log(this);
             }
         },
         value: "Click me"
