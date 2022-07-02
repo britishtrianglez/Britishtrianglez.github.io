@@ -17,7 +17,9 @@ NestedGenerator = (data) => {
     let ReturnObject = new Proxy({
         Element: el,
         id: el.id,
-        classList: el.classList
+        classList: el.classList,
+        parent: data.parent || null,
+        TopLevel: data.TopLevel|| null
     }, {
         deleteProperty: function (target, property) {
             delete target[property];
@@ -95,13 +97,30 @@ NestedGenerator = (data) => {
     function UpdateValue(target, values) {
         Array.from(target.Element.children).forEach(child => target.Element.removeChild(child));
         target.Element.innerHTML = "";
-        target.namedChildren = {};
+
+        if (ReturnObject.TopLevel == null) {
+            target.namedChildren = {};
+        } else {
+            target.namedChildren = ReturnObject.TopLevel.namedChildren;
+        }
+
         target.value = new Proxy([], {
             deleteProperty: function (target_value, property_value) {
                 if (target_value[property_value].type == "VALUE") {
                     target.Element.innerHTML == "";
                     target_value[property_value] = "";
                 } else {
+
+                    if (target_value[property_value]?.id != undefined && target_value[property_value]?.id != "")
+                    {
+                        if (ReturnObject.TopLevel == null ) 
+                        {
+                            delete target.namedChildren[property_value.id];
+                        } else {
+                            delete ReturnObject.namedChildren[property_value.id];
+                        }
+                    }
+
                     target.Element.removeChild(target_value[property_value].Element);
                     delete target_value[property_value]
                 }
@@ -119,8 +138,12 @@ NestedGenerator = (data) => {
 
                 if (value_value instanceof Object) {
 
-
-
+                    if (target.TopLevel == null) {
+                        value_value["TopLevel"] = ReturnObject;
+                    } else {
+                        value_value["TopLevel"] = target.TopLevel;
+                    }
+                    
                     let child = NestedGenerator(value_value);
                     child.parent = ReturnObject;
                     if (ReturnObject.TopLevel == null) {
@@ -134,7 +157,11 @@ NestedGenerator = (data) => {
 
 
                     if (child?.id != undefined && child?.id != "") {
-                        target.namedChildren[child.id] = new Proxy(target_value[property_value], {});
+                        if (target.TopLevel == null) {
+                            target.namedChildren[child.id] = target_value[property_value];
+                        } else {
+                            target.TopLevel.namedChildren[child.id] = target_value[property_value];
+                        }
                     }
                     if (child?.Element != undefined) {
                         target.Element.appendChild(child.Element);
@@ -291,7 +318,20 @@ var TestButton = {
     },
     value: [{
         type: "h1",
-        value: "Hello World",
+        value: [
+            {
+                type: "h2",
+                value: "SubAthon!"
+            },
+            {
+                type: "div",
+                value: [{
+                    type: "h1",
+                    id: "Test",
+                    value: "Super Sub"
+                }]
+            }
+        ],
         style: {
             color: () => {
                 var randomColor = Math.floor(Math.random()*16777215).toString(16);
