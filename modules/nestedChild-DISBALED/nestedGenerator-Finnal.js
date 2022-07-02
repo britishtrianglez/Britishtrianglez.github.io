@@ -95,7 +95,7 @@ NestedGenerator = (data) => {
     function UpdateValue(target, values) {
         Array.from(target.Element.children).forEach(child => target.Element.removeChild(child));
         target.Element.innerHTML = "";
-        target.NamedChildren = {};
+        target.namedChildren = {};
         target.value = new Proxy([], {
             deleteProperty: function (target_value, property_value) {
                 if (target_value[property_value].type == "VALUE") {
@@ -126,7 +126,7 @@ NestedGenerator = (data) => {
 
 
                     if (child?.id != undefined && child?.id != "") {
-                        target.NamedChildren[child.id] = new Proxy(target_value[property_value], {});
+                        target.namedChildren[child.id] = new Proxy(target_value[property_value], {});
                     }
                     if (child?.Element != undefined) {
                         target.Element.appendChild(child.Element);
